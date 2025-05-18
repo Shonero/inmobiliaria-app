@@ -1,0 +1,85 @@
+.unidad-form {
+  max-width: 480px;
+  margin: 20px auto;
+  padding: 20px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 0 12px rgba(0,0,0,0.1);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.unidad-form h4 {
+  margin-bottom: 20px;
+  color: #333;
+  font-weight: 600;
+  border-bottom: 2px solid #007bff;
+  padding-bottom: 6px;
+}
+
+.unidad-form label {
+  display: block;
+  margin: 12px 0 6px;
+  font-weight: 600;
+  color: #444;
+}
+
+.unidad-form input,
+.unidad-form select {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1.8px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+.unidad-form input:focus,
+.unidad-form select:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 6px rgba(0,123,255,0.4);
+}
+
+.error-msg {
+  color: #d9534f;
+  font-size: 0.875rem;
+  margin-top: 4px;
+}
+
+.form-actions {
+  margin-top: 24px;
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.form-actions button {
+  background-color: #007bff;
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  font-weight: 600;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.form-actions button:disabled {
+  background-color: #8ab4f8;
+  cursor: not-allowed;
+}
+
+.form-actions button:hover:not(:disabled) {
+  background-color: #0056b3;
+}
+
+hr {
+  margin: 20px 0;
+  border: none;
+  border-top: 1px solid #ddd;
+}
+
+h5 {
+  color: #222;
+  margin-bottom: 12px;
+}

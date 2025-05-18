@@ -1,0 +1,29 @@
+# Laravel
+/vendor/
+/.env
+/storage/*.key
+/storage/debugbar/
+/storage/framework/
+/storage/logs/
+/storage/oauth-*
+/bootstrap/cache/
+/public/hot
+/public/storage
+/.phpunit.result.cache
+
+# Node/React
+/node_modules/
+npm-debug.log
+yarn-error.log
+
+# IDE
+/.idea
+/.vscode
+.DS_Store
+
+# Docker
+/docker-compose.override.yml
+/.docker
+
+# Testing
+/coverage

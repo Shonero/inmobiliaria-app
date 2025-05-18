@@ -1,0 +1,66 @@
+{
+  "info": {
+    "name": "Inmobiliaria API - Proyectos",
+    "description": "Endpoints para crear y listar proyectos inmobiliarios",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Crear Proyecto",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer TU_TOKEN",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nombre\": \"Residencial Sol\",\n  \"descripcion\": \"Proyecto moderno con amplias áreas verdes\",\n  \"ubicacion\": \"Santiago, Chile\",\n  \"fecha_inicio\": \"2025-06-01\",\n  \"fecha_finalizacion\": \"2026-12-01\",\n  \"estado\": \"En construcción\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost/api/proyectos",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "path": [
+            "api",
+            "proyectos"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Listar Proyectos",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer TU_TOKEN",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost/api/proyectos",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "path": [
+            "api",
+            "proyectos"
+          ]
+        }
+      }
+    }
+  ]
+}
