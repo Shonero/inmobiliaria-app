@@ -22,7 +22,7 @@ class ClienteController extends Controller
         'rut' => 'required|string|max:255',
         'nombre' => 'required|string|max:255',
         'apellido' => 'nullable|string|max:255',
-        'email' => 'nullable|email',
+        'correo_electronico' => 'nullable|email',
         'telefono_contacto' => 'nullable|string|max:255',
     ]);
 
@@ -50,7 +50,7 @@ class ClienteController extends Controller
 
         $validated = $request->validate([
             'nombre' => 'sometimes|required|string|max:255',
-            'email' => 'nullable|email|unique:clientes,email,'.$id,
+            'correo_electronico' => 'nullable|correo_electronico|unique:clientes,correo_electronico,'.$id,
             'telefono_contacto' => 'nullable|string|max:50',
         ]);
 
@@ -77,7 +77,7 @@ class ClienteController extends Controller
     public function validarRut($rut)
 {
     $existe = \App\Models\Cliente::where('rut', $rut)->exists();
-    return response()->json(['unico' => !$existe]);
+    return response()->json(['exists' => $existe]);
 }
 
 }

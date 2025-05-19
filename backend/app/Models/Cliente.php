@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Cliente extends Model
 {
-    use HasUuids;
+    use HasUuids, HasFactory;
 
     protected $table = 'clientes';
     public $incrementing = false;
@@ -17,7 +18,7 @@ class Cliente extends Model
         'rut',
         'nombre',
         'apellido',
-        'email',
+        'correo_electronico',
         'telefono_contacto',
     ];
 

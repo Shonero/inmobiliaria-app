@@ -9,10 +9,12 @@ class CreateClientesTable extends Migration
     public function up()
     {
         Schema::create('clientes', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
+            $table->string('rut')->unique();
             $table->string('nombre');
-            $table->string('email')->unique()->nullable(); // Columna email
-            $table->string('telefono')->nullable();
+            $table->string('apellido'); // ✅ Esta línea falta según tu error
+            $table->string('correo_electronico');
+            $table->string('telefono_contacto')->nullable();
             $table->timestamps();
         });
     }
