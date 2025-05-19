@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import "../styles/UnidadForm.css";
+import api from "../api/axios";
 
 export default function UnidadForm({ proyectoId, unidad, onCancel, onSave, permitirNuevoCliente }) {
   const [clientes, setClientes] = useState([]);
@@ -16,7 +17,7 @@ export default function UnidadForm({ proyectoId, unidad, onCancel, onSave, permi
       rut: "",
       nombre: "",
       apellido: "",
-      email: "",
+      correo_electronico: "",
       telefono_contacto: ""
     }
   });
@@ -36,7 +37,7 @@ export default function UnidadForm({ proyectoId, unidad, onCancel, onSave, permi
           rut: "",
           nombre: "",
           apellido: "",
-          email: "",
+          correo_electronico: "",
           telefono_contacto: ""
         }
       });
@@ -49,15 +50,8 @@ export default function UnidadForm({ proyectoId, unidad, onCancel, onSave, permi
 
   useEffect(() => {
     if (permitirNuevoCliente) {
-      const token = localStorage.getItem("token");
-      fetch("/api/clientes", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          Accept: "application/json",
-        },
-      })
-        .then((res) => res.json())
-        .then((data) => setClientes(data))
+    api.get("/clientes")
+      .then((res) => setClientes(res.data))
         .catch(() => setClientes([]));
     }
   }, [permitirNuevoCliente]);
@@ -81,22 +75,13 @@ export default function UnidadForm({ proyectoId, unidad, onCancel, onSave, permi
   }
 
   const validate = async () => {
-    const token = localStorage.getItem("token");
     const newErrors = {};
 
-    if (!formData.numero_unidad) {
-      newErrors.numero_unidad = "Este campo es obligatorio";
-    } else if (!unidad || formData.numero_unidad !== unidad.numero_unidad) {
+  // Validar número de unidad solo si cambia
+  if (!unidad || formData.numero_unidad !== unidad.numero_unidad) {
       try {
-        const res = await fetch(`/api/unidades/validar-numero/${formData.numero_unidad}/${proyectoId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            Accept: "application/json",
-          },
-        });
-        if (!res.ok) throw new Error("Error en la validación");
-        const data = await res.json();
-        if (data.exists) {
+      const res = await api.get(`/unidades/validar-numero/${formData.numero_unidad}/${proyectoId}`);
+      if (res.data.exists) {
           newErrors.numero_unidad = "El número de unidad ya existe";
         }
       } catch {
@@ -104,33 +89,29 @@ export default function UnidadForm({ proyectoId, unidad, onCancel, onSave, permi
       }
     }
 
+  // Validaciones generales
     if (!formData.metraje_cuadrado || isNaN(formData.metraje_cuadrado)) {
       newErrors.metraje_cuadrado = "Debe ingresar un número válido";
     }
-
     if (!formData.precio_venta || isNaN(formData.precio_venta)) {
       newErrors.precio_venta = "Debe ingresar un precio numérico";
     }
-
     if (!formData.estado) {
       newErrors.estado = "Debe seleccionar un estado";
     }
 
+  // Validaciones cliente nuevo
     if (permitirNuevoCliente && usandoNuevoCliente) {
       const rutRegex = /^\d{1,2}\.\d{3}\.\d{3}-[\dkK]$/;
+    console.log("paso 1");
       if (!rutRegex.test(formData.cliente.rut)) {
         newErrors.rut = "RUT inválido. Ej: 12.345.678-9";
       } else {
         try {
-          const res = await fetch(`/api/clientes/validar-rut/${formData.cliente.rut}`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              Accept: "application/json",
-            },
-          });
-          if (!res.ok) throw new Error("Error en la validación");
-          const data = await res.json();
-          if (data.exists) {
+        const res = await api.get(`/clientes/validar-rut/${formData.cliente.rut}`);
+console.log(res.data.exists);
+        if (res.data.exists) {
+          
             newErrors.rut = "El RUT ya existe";
           }
         } catch {
@@ -138,20 +119,18 @@ export default function UnidadForm({ proyectoId, unidad, onCancel, onSave, permi
         }
       }
 
+
       const letrasRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
       if (!letrasRegex.test(formData.cliente.nombre)) {
         newErrors.nombre = "Solo letras permitidas";
       }
-
       if (!letrasRegex.test(formData.cliente.apellido)) {
         newErrors.apellido = "Solo letras permitidas";
       }
-
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(formData.cliente.email)) {
-        newErrors.email = "Email inválido";
+    if (!emailRegex.test(formData.cliente.correo_electronico)) {
+      newErrors.correo_electronico = "Email inválido";
       }
-
       if (!/^\d+$/.test(formData.cliente.telefono_contacto)) {
         newErrors.telefono_contacto = "Solo números permitidos";
       }
@@ -163,19 +142,32 @@ export default function UnidadForm({ proyectoId, unidad, onCancel, onSave, permi
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+  // Formatear el RUT
     if (name === "rut") {
       const formattedRut = formatRut(value);
       setFormData((prev) => ({
         ...prev,
         cliente: { ...prev.cliente, rut: formattedRut },
       }));
+
+    // Si cambia el RUT, limpiamos el error para que el usuario vea feedback nuevo
+    setErrors((prev) => ({ ...prev, rut: undefined }));
     } else if (name in formData.cliente) {
       setFormData((prev) => ({
         ...prev,
         cliente: { ...prev.cliente, [name]: value },
       }));
+
+    // Limpia error correspondiente si existía
+    if (name in errors) {
+      setErrors((prev) => ({ ...prev, [name]: undefined }));
+    }
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
+
+    if (name in errors) {
+      setErrors((prev) => ({ ...prev, [name]: undefined }));
+    }
     }
   };
 
@@ -190,7 +182,7 @@ export default function UnidadForm({ proyectoId, unidad, onCancel, onSave, permi
           rut: "",
           nombre: "",
           apellido: "",
-          email: "",
+          correo_electronico: "",
           telefono_contacto: "",
         },
       }));
@@ -211,63 +203,41 @@ const handleSubmit = async (e) => {
   setValidating(true);
   const isValid = await validate();
   setValidating(false);
-  if (!isValid) return;
 
-  const token = localStorage.getItem("token");
+  if (!isValid) return; // Si hay errores (incluido RUT), no continuar
 
-  // Preparar el body para enviar
+
+  try {
+    let clienteId = clienteSeleccionadoId;
+
+    if (usandoNuevoCliente) {
+      const resCliente = await api.post("/clientes", formData.cliente);
+      clienteId = resCliente.data.id;
+    }
+
   const body = {
     numero_unidad: formData.numero_unidad,
     tipo_unidad: formData.tipo_unidad,
     metraje_cuadrado: formData.metraje_cuadrado,
     precio_venta: formData.precio_venta,
     estado: formData.estado,
-    cliente_id: usandoNuevoCliente ? null : clienteSeleccionadoId
+      cliente_id: clienteId,
   };
-if (usandoNuevoCliente && !unidad?.id) {
-  body.cliente = formData.cliente;
-}
-  try {
+
     let res;
     if (unidad && unidad.id) {
-      // Editar unidad - PUT
-      res = await fetch(`/api/proyectos/${proyectoId}/unidades/${unidad.id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-          Accept: "application/json",
-        },
-        body: JSON.stringify(body),
-      });
+      res = await api.put(`/proyectos/${proyectoId}/unidades/${unidad.id}`, body);
     } else {
-      // Crear unidad - POST
-        res = await fetch(`/api/proyectos/${proyectoId}/unidades`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-          Accept: "application/json",
-        },
-        body: JSON.stringify(body),
-      });
+      res = await api.post(`/proyectos/${proyectoId}/unidades`, body);
     }
 
-    if (!res.ok) {
-      const errorData = await res.json();
-      // Aquí podrías mostrar errores desde backend si quieres
-      alert("Error guardando la unidad: " + (errorData.message || res.statusText));
-      return;
-    }
-
-    const data = await res.json();
-
-    // Llamar a onSave con la respuesta para que el padre actualice la UI
-    onSave(data);
+    onSave(res.data);
   } catch (error) {
-    alert("Error al comunicarse con el servidor.");
+    const msg = error.response?.data?.message || "Error al comunicarse con el servidor.";
+    alert("Error guardando la unidad: " + msg);
   }
 };
+
 
 
   return (
@@ -330,8 +300,8 @@ if (usandoNuevoCliente && !unidad?.id) {
                 {errors.apellido && <span className="error-msg">{errors.apellido}</span>}
 
                 <label>Email</label>
-                <input name="email" value={formData.cliente.email} onChange={handleChange} />
-                {errors.email && <span className="error-msg">{errors.email}</span>}
+                <input name="correo_electronico" value={formData.cliente.correo_electronico} onChange={handleChange} />
+                {errors.correo_electronico && <span className="error-msg">{errors.correo_electronico}</span>}
 
                 <label>Teléfono</label>
                 <input name="telefono_contacto" value={formData.cliente.telefono_contacto} onChange={handleChange} />
